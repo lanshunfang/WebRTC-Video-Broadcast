@@ -2,11 +2,11 @@ FROM node:lts
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+#COPY package*.json ./
 
-RUN npm install
+#RUN npm install
 
-COPY . .
+#COPY . .
 
 EXPOSE 4000:4000
 

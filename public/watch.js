@@ -1,22 +1,23 @@
 let peerConnection;
-const config = {
-  iceServers: [
-      { 
-        "urls": "stun:stun.l.google.com:19302",
-      },
-      // { 
-      //   "urls": "turn:TURN_IP?transport=tcp",
-      //   "username": "TURN_USERNAME",
-      //   "credential": "TURN_CREDENTIALS"
-      // }
-  ]
-};
+const config = CONFIG;
+//const config = {
+//  iceServers: [
+//      { 
+//        "urls": "stun:stun.l.google.com:19302",
+//      },
+//      // { 
+//      //   "urls": "turn:TURN_IP?transport=tcp",
+//      //   "username": "TURN_USERNAME",
+//      //   "credential": "TURN_CREDENTIALS"
+//      // }
+//  ]
+//};
 
 const socket = io.connect(window.location.origin);
 const video = document.querySelector("video");
-const enableAudioButton = document.querySelector("#enable-audio");
+const toggleAudioButton = document.querySelector("#toggle-audio");
 
-enableAudioButton.addEventListener("click", enableAudio)
+toggleAudioButton.addEventListener("click", toggleAudio)
 
 socket.on("offer", (id, description) => {
   peerConnection = new RTCPeerConnection(config);
@@ -57,7 +58,7 @@ window.onunload = window.onbeforeunload = () => {
   peerConnection.close();
 };
 
-function enableAudio() {
-  console.log("Enabling audio")
-  video.muted = false;
+function toggleAudio() {
+  video.muted = !video.muted;
+  toggleAudioButton.innerText = video.muted ? "开启声音" : "静音"
 }

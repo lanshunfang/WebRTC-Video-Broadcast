@@ -1,16 +1,18 @@
 const peerConnections = {};
-const config = {
-  iceServers: [
-    { 
-      "urls": "stun:stun.l.google.com:19302",
-    },
-    // { 
-    //   "urls": "turn:TURN_IP?transport=tcp",
-    //   "username": "TURN_USERNAME",
-    //   "credential": "TURN_CREDENTIALS"
-    // }
-  ]
-};
+const config = CONFIG;
+//const config = {
+//  iceServers: [
+//    { 
+//      //"urls": "stun:stun.l.google.com:19302",
+//      "urls": "stun:stun.xiaofang.me:5349",
+//    },
+//    // { 
+//    //   "urls": "turn:TURN_IP?transport=tcp",
+//    //   "username": "TURN_USERNAME",
+//    //   "credential": "TURN_CREDENTIALS"
+//    // }
+//  ]
+//};
 
 const socket = io.connect(window.location.origin);
 
@@ -93,7 +95,7 @@ function getStream() {
   const videoSource = videoSelect.value;
   const constraints = {
     audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
-    video: { deviceId: videoSource ? { exact: videoSource } : undefined }
+    video: {width: {exact: 640}, height: {exact: 480}, deviceId: videoSource ? { exact: videoSource } : undefined }
   };
   return navigator.mediaDevices
     .getUserMedia(constraints)
