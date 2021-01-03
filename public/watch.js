@@ -1,19 +1,7 @@
 let peerConnection;
 const config = CONFIG;
-//const config = {
-//  iceServers: [
-//      { 
-//        "urls": "stun:stun.l.google.com:19302",
-//      },
-//      // { 
-//      //   "urls": "turn:TURN_IP?transport=tcp",
-//      //   "username": "TURN_USERNAME",
-//      //   "credential": "TURN_CREDENTIALS"
-//      // }
-//  ]
-//};
 
-const socket = io.connect(window.location.origin);
+const socket = io("/" + config.getIONS());
 const video = document.querySelector("video");
 const toggleAudioButton = document.querySelector("#toggle-audio");
 

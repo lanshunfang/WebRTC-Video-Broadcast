@@ -6,18 +6,22 @@
   </head>
   <body>
     <section class="select">
-      <label for="audioSource">Audio source: </label>
+      <label for="audioSource">音频输入: </label>
       <select id="audioSource"></select>
     </section>
 
     <section class="select">
-      <label for="videoSource">Video source: </label>
+      <label for="videoSource">视频输入: </label>
       <select id="videoSource"></select>
     </section>
 
+    <section class="preview">
+	<a href="./" target="_blank">实际预览</a>
+    </section>
+
     <video playsinline autoplay muted></video>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/config.js"></script>
-    <script src="/broadcast.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="config.js"></script>
+    <script src="broadcast.js"></script>
   </body>
 </html>

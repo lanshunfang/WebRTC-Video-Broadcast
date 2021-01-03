@@ -1,20 +1,14 @@
+let hostkey
+while(!hostkey || hostkey.length < 6) {
+	hostkey = prompt("请输入主持人密码");
+}
+
+
 const peerConnections = {};
 const config = CONFIG;
-//const config = {
-//  iceServers: [
-//    { 
-//      //"urls": "stun:stun.l.google.com:19302",
-//      "urls": "stun:stun.xiaofang.me:5349",
-//    },
-//    // { 
-//    //   "urls": "turn:TURN_IP?transport=tcp",
-//    //   "username": "TURN_USERNAME",
-//    //   "credential": "TURN_CREDENTIALS"
-//    // }
-//  ]
-//};
 
-const socket = io.connect(window.location.origin);
+//const socket = io.connect(window.location.origin).of(config.getIONS());
+const socket = io("/" + config.getIONS());
 
 socket.on("answer", (id, description) => {
   peerConnections[id].setRemoteDescription(description);
@@ -112,7 +106,7 @@ function gotStream(stream) {
     option => option.text === stream.getVideoTracks()[0].label
   );
   videoElement.srcObject = stream;
-  socket.emit("broadcaster");
+  socket.emit("broadcaster", hostkey);
 }
 
 function handleError(error) {
