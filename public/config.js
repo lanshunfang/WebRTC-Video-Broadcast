@@ -9,9 +9,12 @@ const getConfig = () => {
         return null;
     }
 
-    const password = getUserInput("password", `请输入房间号"${username}"的密码`);
+    const password = getUserInput("password", `房间号"${username}"密码`, 6);
+    const fullname = getUserInput("fullname", `您的名字`, 2);
 
     return {
+
+        fullname: fullname,
         iceServers: [
             {
                 //"urls": "stun:stun.l.google.com:19302",
@@ -26,7 +29,7 @@ const getConfig = () => {
         ],
         getIONS() {
             return encodeURIComponent(`${username}[${server}]`)
-        }
+        },
 
     };
 

@@ -1,13 +1,11 @@
 const config = getConfig();
 
 // Get camera and microphone
-const videoElement = document.querySelector("video");
-const audioSelect = document.querySelector("select#audioSource");
-const videoSelect = document.querySelector("select#videoSource");
+const videoElement = doc.querySelector("video");
+const audioSelect = doc.querySelector("select#audioSource");
+const videoSelect = doc.querySelector("select#videoSource");
 
-const peerConnections = {};
-
-//const socket = io.connect(window.location.origin).of(config.getIONS());
+//const socket = io.connect(win.location.origin).of(config.getIONS());
 const socket = io("/" + config.getIONS());
 
 let hostkey;
@@ -16,15 +14,21 @@ if (config) {
   init();
 }
 
-function init() {
-  hostkey = getUserInput("hostkey", "请输入主持人密码。");
-  socket.on("answer", (id, description) => {
-    peerConnections[id].setRemoteDescription(description);
-  });
-
-  socket.on("watcher", id => {
+class UserList {
+  constructor() {
+    this._users = {};
+  }
+  getUsers() {
+    return this._users;
+  }
+  addUser(watcherObj) {
+    const id = watcherObj.id;
     const peerConnection = new RTCPeerConnection(config);
-    peerConnections[id] = peerConnection;
+    this._users[id] = {
+      id: id,
+      peerConnection: peerConnection,
+      watcherObj: watcherObj,
+    };
 
     let stream = videoElement.srcObject;
     stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
@@ -39,20 +43,71 @@ function init() {
       .createOffer()
       .then(sdp => peerConnection.setLocalDescription(sdp))
       .then(() => {
-        socket.emit("offer", id, peerConnection.localDescription);
+        socket.emit("offer", {
+          id,
+          msg: peerConnection.localDescription,
+          broadcasterName: config.fullname
+        });
       });
+    notifyMe(`用户加入：${this._users[id].watcherObj.fullname}`);
+    this.updateWatcherList();
+  }
+
+  updateWatcherList() {
+    const container = doc.querySelector('.watcher-list');
+    const users = Object.values(this._users)
+      .sort((a, b) => a.id === b.id ? 0 : (a.id > b.id ? -1 : 1));
+    const usersHtml = users
+      .map(
+        user => `<li id="${user.id}">${user.watcherObj.fullname}</li>`
+      )
+      .join('');
+
+    container.innerHTML = usersHtml;
+
+    doc.querySelector('.user-count').innerText = users.length;
+
+  }
+
+  setUserAnswer(id, description) {
+    this._users[id].peerConnection.setRemoteDescription(description);
+  }
+
+  disconnectUser(id) {
+    this._users[id].peerConnection.close();
+    delete this._users[id];
+    notifyMe(`用户离开：${this._users[id].watcherObj.fullname}`);
+    this.updateWatcherList();
+  }
+
+  addCandidateToUser(id, candidate) {
+    this._users[id].peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+}
+
+const userlist = new UserList();
+
+function init() {
+  hostkey = getUserInput("hostkey", "请输入主持人密码。", 6);
+  socket.on("answer", (id, description) => {
+    userlist.setUserAnswer(id, description);
+
+  });
+
+  socket.on("watcher", watcherObj => {
+    userlist.addUser(watcherObj);
+
   });
 
   socket.on("candidate", (id, candidate) => {
-    peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+    userlist.addCandidateToUser(id, candidate);
   });
 
   socket.on("disconnectPeer", id => {
-    peerConnections[id].close();
-    delete peerConnections[id];
+    userlist.disconnectUser(id);
   });
 
-  window.onunload = window.onbeforeunload = () => {
+  win.onunload = win.onbeforeunload = () => {
     socket.close();
   };
 
@@ -69,7 +124,7 @@ function init() {
 
 function setWatcherPreviewLink() {
   const search = location.search;
-  document.querySelector('#watcher-preview').setAttribute('href', "./" + search);
+  doc.querySelector('#watcher-preview').setAttribute('href', "./" + search);
 }
 
 function getDevices() {
@@ -77,9 +132,9 @@ function getDevices() {
 }
 
 function gotDevices(deviceInfos) {
-  window.deviceInfos = deviceInfos;
+  win.deviceInfos = deviceInfos;
   for (const deviceInfo of deviceInfos) {
-    const option = document.createElement("option");
+    const option = doc.createElement("option");
     option.value = deviceInfo.deviceId;
     if (deviceInfo.kind === "audioinput") {
       option.text = deviceInfo.label || `Microphone ${audioSelect.length + 1}`;
@@ -92,8 +147,8 @@ function gotDevices(deviceInfos) {
 }
 
 function getStream() {
-  if (window.stream) {
-    window.stream.getTracks().forEach(track => {
+  if (win.stream) {
+    win.stream.getTracks().forEach(track => {
       track.stop();
     });
   }
@@ -110,7 +165,7 @@ function getStream() {
 }
 
 function gotStream(stream) {
-  window.stream = stream;
+  win.stream = stream;
   audioSelect.selectedIndex = [...audioSelect.options].findIndex(
     option => option.text === stream.getAudioTracks()[0].label
   );
@@ -124,3 +179,4 @@ function gotStream(stream) {
 function handleError(error) {
   console.error("Error: ", error);
 }
+

@@ -76,7 +76,7 @@ apt install -y docker.io
 npm install
 # dev 
 # mock data
-export TURN_USERS="sw010[chat.xiaofang.me]\n"
+export TURN_USERS=sw010[chat.xiaofang.me]
 echo sw123321 > "./host-token"
 node server.js
 

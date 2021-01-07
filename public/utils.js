@@ -1,3 +1,6 @@
+const doc = document;
+const win = window;
+
 function getUserInput(storagekey, msg, minlength = 6) {
 	const defaultValue = getStorage(storagekey);
 	let userinput;
@@ -13,4 +16,42 @@ const getStorage = (key, defaultValue) => {
 }
 const setStorage = (key, val) => {
 	localStorage.setItem(key, val);
+}
+
+let notificationClearerId;
+function notifyMe(msg) {
+	// Let's check if the browser supports notifications
+	if ("Notification" in window) {
+		if (Notification.permission === "granted") {
+			// If it's okay let's create a notification
+			new Notification(msg);
+		}
+
+		// Otherwise, we need to ask the user for permission
+		else if (Notification.permission !== "denied") {
+			Notification.requestPermission().then(function (permission) {
+				// If the user accepts, let's create a notification
+				if (permission === "granted") {
+					new Notification(msg);
+				}
+			});
+		}
+	}
+
+	const newItm = doc.createElement('li');
+
+	const notificationContainer = doc.querySelector('.notification');
+	notificationContainer.appendChild(newItm);
+	newItm.innerHTML = msg;
+	notificationContainer.classList.remove('hide');
+
+	clearTimeout(notificationClearerId);
+	notificationClearerId = setTimeout(
+		() => {
+			notificationContainer.innerHTML = "";
+			notificationContainer.classList.add('hide');
+		},
+		10000
+	);
+
 }

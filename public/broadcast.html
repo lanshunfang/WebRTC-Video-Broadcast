@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Broadcaster</title>
-    <meta charset="UTF-8" />
-  </head>
-  <body>
+
+<head>
+  <title>Broadcaster</title>
+  <meta charset="UTF-8" />
+  <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body>
+  <section class="notification hide"></section>
+  <section class="settings">
     <section class="select">
       <label for="audioSource">音频输入: </label>
       <select id="audioSource"></select>
@@ -14,15 +19,25 @@
       <label for="videoSource">视频输入: </label>
       <select id="videoSource"></select>
     </section>
+  </section>
 
+  <section class="info">
     <section class="preview">
-	<a id="watcher-preview" href="./" target="_blank">实际预览</a>
+      <a id="watcher-preview" href="./" target="_blank">实际预览</a>
     </section>
+    <section class="watcher-info">
+      <h2>当前用户列表(<span class="user-count">0</span>)</h2>
+      <ol class="watcher-list">
+      </ol>
+    </section>
+  </section>
 
-    <video playsinline autoplay muted></video>
-    <script src="socket.io/socket.io.js"></script>
-    <script src="utils.js"></script>
-    <script src="config.js"></script>
-    <script src="broadcast.js"></script>
-  </body>
+  <video playsinline autoplay muted></video>
+
+  <script src="socket.io/socket.io.js"></script>
+  <script src="utils.js"></script>
+  <script src="config.js"></script>
+  <script src="broadcast.js"></script>
+</body>
+
 </html>

@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>直播室</title>
-    <meta charset="UTF-8" />
-    <link href="styles.css" rel="stylesheet" />
-  </head>
-  <body>
+
+<head>
+  <title>直播室</title>
+  <meta charset="UTF-8" />
+  <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body>
+  <section class="notification hide"></section>
+  <section class="wait-broadcasting">请等待直接开始</section>
+  <section class="broadcasting hide">
     <section id="handler">
-    	<button id="toggle-audio">开启声音</button>
+      <button id="toggle-audio">开启声音</button>
     </section>
+
     <video playsinline autoplay muted poster="images/loading.gif"></video>
-    <script src="socket.io/socket.io.js"></script>
-    <script src="utils.js"></script>
-    <script src="config.js"></script>
-    <script src="watch.js"></script>
-  </body>
+  </section>
+  <script src="socket.io/socket.io.js"></script>
+  <script src="utils.js"></script>
+  <script src="config.js"></script>
+  <script src="watch.js"></script>
+</body>
+
 </html>
