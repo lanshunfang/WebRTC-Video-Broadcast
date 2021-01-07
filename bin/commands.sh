@@ -74,9 +74,13 @@ cd ${webRTCPath}
 
 apt install -y docker.io
 npm install
-docker build --tag webrtc/broadcast .
 # dev 
+# mock data
+export TURN_USERS="sw010[chat.xiaofang.me]\n"
+echo sw123321 > "./host-token"
 node server.js
+
+docker build --tag webrtc/broadcast .
 # test
 docker run -v $(pwd):/usr/src/app --env TURN_USERS=$(turnadmin -l) -p 4000:4000 --rm -it webrtc/broadcast
 # run

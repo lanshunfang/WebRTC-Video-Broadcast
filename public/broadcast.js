@@ -1,64 +1,76 @@
-let hostkey
-while(!hostkey || hostkey.length < 6) {
-	hostkey = prompt("请输入主持人密码");
-}
-
-
-const peerConnections = {};
-const config = CONFIG;
-
-//const socket = io.connect(window.location.origin).of(config.getIONS());
-const socket = io("/" + config.getIONS());
-
-socket.on("answer", (id, description) => {
-  peerConnections[id].setRemoteDescription(description);
-});
-
-socket.on("watcher", id => {
-  const peerConnection = new RTCPeerConnection(config);
-  peerConnections[id] = peerConnection;
-
-  let stream = videoElement.srcObject;
-  stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-
-  peerConnection.onicecandidate = event => {
-    if (event.candidate) {
-      socket.emit("candidate", id, event.candidate);
-    }
-  };
-
-  peerConnection
-    .createOffer()
-    .then(sdp => peerConnection.setLocalDescription(sdp))
-    .then(() => {
-      socket.emit("offer", id, peerConnection.localDescription);
-    });
-});
-
-socket.on("candidate", (id, candidate) => {
-  peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
-});
-
-socket.on("disconnectPeer", id => {
-  peerConnections[id].close();
-  delete peerConnections[id];
-});
-
-window.onunload = window.onbeforeunload = () => {
-  socket.close();
-};
+const config = getConfig();
 
 // Get camera and microphone
 const videoElement = document.querySelector("video");
 const audioSelect = document.querySelector("select#audioSource");
 const videoSelect = document.querySelector("select#videoSource");
 
-audioSelect.onchange = getStream;
-videoSelect.onchange = getStream;
+const peerConnections = {};
 
-getStream()
-  .then(getDevices)
-  .then(gotDevices);
+//const socket = io.connect(window.location.origin).of(config.getIONS());
+const socket = io("/" + config.getIONS());
+
+let hostkey;
+
+if (config) {
+  init();
+}
+
+function init() {
+  hostkey = getUserInput("hostkey", "请输入主持人密码。");
+  socket.on("answer", (id, description) => {
+    peerConnections[id].setRemoteDescription(description);
+  });
+
+  socket.on("watcher", id => {
+    const peerConnection = new RTCPeerConnection(config);
+    peerConnections[id] = peerConnection;
+
+    let stream = videoElement.srcObject;
+    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+    peerConnection.onicecandidate = event => {
+      if (event.candidate) {
+        socket.emit("candidate", id, event.candidate);
+      }
+    };
+
+    peerConnection
+      .createOffer()
+      .then(sdp => peerConnection.setLocalDescription(sdp))
+      .then(() => {
+        socket.emit("offer", id, peerConnection.localDescription);
+      });
+  });
+
+  socket.on("candidate", (id, candidate) => {
+    peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+  });
+
+  socket.on("disconnectPeer", id => {
+    peerConnections[id].close();
+    delete peerConnections[id];
+  });
+
+  window.onunload = window.onbeforeunload = () => {
+    socket.close();
+  };
+
+  audioSelect.onchange = getStream;
+  videoSelect.onchange = getStream;
+
+  getStream()
+    .then(getDevices)
+    .then(gotDevices);
+
+  setWatcherPreviewLink();
+
+}
+
+function setWatcherPreviewLink() {
+  const search = location.search;
+  document.querySelector('#watcher-preview').setAttribute('href', "./" + search);
+}
 
 function getDevices() {
   return navigator.mediaDevices.enumerateDevices();
@@ -89,7 +101,7 @@ function getStream() {
   const videoSource = videoSelect.value;
   const constraints = {
     audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
-    video: {width: {exact: 640}, height: {exact: 480}, deviceId: videoSource ? { exact: videoSource } : undefined }
+    video: { width: { exact: 640 }, height: { exact: 480 }, deviceId: videoSource ? { exact: videoSource } : undefined }
   };
   return navigator.mediaDevices
     .getUserMedia(constraints)
