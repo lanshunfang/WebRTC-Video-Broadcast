@@ -55,3 +55,13 @@ function notifyMe(msg) {
 	);
 
 }
+
+function toggleElement(selector1, selector2, isSwitchSelector) {
+
+	if (isSwitchSelector) {
+		[selector1, selector2] = [selector2, selector1];
+	}
+
+	doc.querySelector(selector1).classList.add('hide');
+	doc.querySelector(selector2).classList.remove('hide');
+}

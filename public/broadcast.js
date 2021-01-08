@@ -75,8 +75,8 @@ class UserList {
 
   disconnectUser(id) {
     this._users[id].peerConnection.close();
-    delete this._users[id];
     notifyMe(`用户离开：${this._users[id].watcherObj.fullname}`);
+    delete this._users[id];
     this.updateWatcherList();
   }
 

@@ -10,7 +10,7 @@ if (config) {
 
 function init() {
 
-  toggleAudioButton.addEventListener("click", toggleAudio)
+  toggleAudioButton.addEventListener("click", toggleAudio);
 
   socket.on("offer", (data) => {
     notifyMe(`${data.broadcasterName} 正在直播`);
@@ -23,7 +23,9 @@ function init() {
         socket.emit("answer", data.id, peerConnection.localDescription);
       });
     peerConnection.ontrack = event => {
-      broadcastStateChange();
+
+      toggleElement('.wait-broadcasting', '.broadcasting');
+
       video.srcObject = event.streams[0];
 
     };
@@ -59,17 +61,6 @@ function init() {
 function toggleAudio() {
   video.muted = !video.muted;
   toggleAudioButton.innerText = video.muted ? "开启声音" : "静音";
-}
-
-function broadcastStateChange(isStop = false) {
-  let ele1 = '.wait-broadcasting', ele2 = '.broadcasting';
-
-  if (isStop) {
-    [ele1, ele2] = [ele2, ele1];
-  }
-
-  doc.querySelector(ele1).classList.add('hide');
-  doc.querySelector(ele2).classList.remove('hide');
 }
 
 function emitWatcher(socket) {
