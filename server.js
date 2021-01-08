@@ -77,6 +77,13 @@ turnusers.forEach(
 			socket.on("candidate", (id, message) => {
 				socket.to(id).emit("candidate", socket.id, message);
 			});
+
+
+			socket.on("chat", (chatObj) => {
+				console.log('Chat content sent', chatObj);
+				ions.emit("chat-receive", chatObj);
+			});
+
 			socket.on("disconnect", () => {
 				console.log(`[INFO] Watcher disconnected at ${socket.id}`)
 				socket.to(broadcaster).emit("disconnectPeer", socket.id);

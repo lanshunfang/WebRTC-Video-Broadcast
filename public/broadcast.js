@@ -5,8 +5,6 @@ const videoElement = doc.querySelector("video");
 const audioSelect = doc.querySelector("select#audioSource");
 const videoSelect = doc.querySelector("select#videoSource");
 
-//const socket = io.connect(win.location.origin).of(config.getIONS());
-const socket = io("/" + config.getIONS());
 
 let hostkey;
 
@@ -35,7 +33,7 @@ class UserList {
 
     peerConnection.onicecandidate = event => {
       if (event.candidate) {
-        socket.emit("candidate", id, event.candidate);
+        config.socket.emit("candidate", id, event.candidate);
       }
     };
 
@@ -43,13 +41,13 @@ class UserList {
       .createOffer()
       .then(sdp => peerConnection.setLocalDescription(sdp))
       .then(() => {
-        socket.emit("offer", {
+        config.socket.emit("offer", {
           id,
           msg: peerConnection.localDescription,
           broadcasterName: config.fullname
         });
       });
-    notifyMe(`用户加入：${this._users[id].watcherObj.fullname}`);
+    notify(`用户加入：${this._users[id].watcherObj.fullname}`);
     this.updateWatcherList();
   }
 
@@ -75,7 +73,7 @@ class UserList {
 
   disconnectUser(id) {
     this._users[id].peerConnection.close();
-    notifyMe(`用户离开：${this._users[id].watcherObj.fullname}`);
+    notify(`用户离开：${this._users[id].watcherObj.fullname}`);
     delete this._users[id];
     this.updateWatcherList();
   }
@@ -89,26 +87,26 @@ const userlist = new UserList();
 
 function init() {
   hostkey = getUserInput("hostkey", "请输入主持人密码。", 6);
-  socket.on("answer", (id, description) => {
+  config.socket.on("answer", (id, description) => {
     userlist.setUserAnswer(id, description);
 
   });
 
-  socket.on("watcher", watcherObj => {
+  config.socket.on("watcher", watcherObj => {
     userlist.addUser(watcherObj);
 
   });
 
-  socket.on("candidate", (id, candidate) => {
+  config.socket.on("candidate", (id, candidate) => {
     userlist.addCandidateToUser(id, candidate);
   });
 
-  socket.on("disconnectPeer", id => {
+  config.socket.on("disconnectPeer", id => {
     userlist.disconnectUser(id);
   });
 
   win.onunload = win.onbeforeunload = () => {
-    socket.close();
+    config.socket.close();
   };
 
   audioSelect.onchange = getStream;
@@ -173,7 +171,7 @@ function gotStream(stream) {
     option => option.text === stream.getVideoTracks()[0].label
   );
   videoElement.srcObject = stream;
-  socket.emit("broadcaster", hostkey);
+  config.socket.emit("broadcaster", hostkey);
 }
 
 function handleError(error) {

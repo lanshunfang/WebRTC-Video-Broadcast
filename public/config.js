@@ -1,3 +1,4 @@
+
 const getConfig = () => {
     let urlparams = new URLSearchParams(location.search);
     const username = urlparams.get("zoomid");
@@ -12,7 +13,7 @@ const getConfig = () => {
     const password = getUserInput("password", `房间号"${username}"密码`, 6);
     const fullname = getUserInput("fullname", `您的名字`, 2);
 
-    return {
+    const config = {
 
         fullname: fullname,
         iceServers: [
@@ -28,9 +29,17 @@ const getConfig = () => {
             }
         ],
         getIONS() {
-            return encodeURIComponent(`${username}[${server}]`)
-        },
+            return encodeURIComponent(`${username}[${server}]`);
+        }
 
     };
 
+    config.socket = io("/" + config.getIONS());
+
+    return config;
+
+};
+
+const STATE = {
+    isTabFocused: true,
 };

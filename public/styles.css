@@ -1,5 +1,5 @@
 html {
-  font-size: 12px;
+  font-size: 14px;
 }
 html,
 body {
@@ -15,8 +15,9 @@ video {
   display: none;
 }
 
-.notification {
-  height: 200px;
+.notification,
+.chat {
+  height: 100px;
   width: 200px;
   overflow-y: auto;
   position: fixed;
@@ -26,4 +27,22 @@ video {
   border: 1px solid #333;
   background-color: rgba(255, 255, 255, 0.7);
   padding: 10px;
+}
+.chat {
+  height: 160px;
+  bottom: 10px;
+  top: auto;
+}
+.chat-view {
+  padding: 10px;
+  overflow-y: auto;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.7);
+}
+.chat-form {
+  position: absolute;
+  bottom: 5px;
+}
+.chat-input {
+  margin-right: 5px;
 }

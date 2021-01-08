@@ -1,8 +1,7 @@
 const config = getConfig();
 let peerConnection;
-const socket = io("/" + config.getIONS());
-const video = document.querySelector("video");
-const toggleAudioButton = document.querySelector("#toggle-audio");
+const video = doc.querySelector("video");
+const toggleAudioButton = doc.querySelector("#toggle-audio");
 
 if (config) {
   init();
@@ -12,15 +11,15 @@ function init() {
 
   toggleAudioButton.addEventListener("click", toggleAudio);
 
-  socket.on("offer", (data) => {
-    notifyMe(`${data.broadcasterName} 正在直播`);
+  config.socket.on("offer", (data) => {
+    notify(`${data.broadcasterName} 正在直播`);
     peerConnection = new RTCPeerConnection(config);
     peerConnection
       .setRemoteDescription(data.msg)
       .then(() => peerConnection.createAnswer())
       .then(sdp => peerConnection.setLocalDescription(sdp))
       .then(() => {
-        socket.emit("answer", data.id, peerConnection.localDescription);
+        config.socket.emit("answer", data.id, peerConnection.localDescription);
       });
     peerConnection.ontrack = event => {
 
@@ -31,28 +30,28 @@ function init() {
     };
     peerConnection.onicecandidate = event => {
       if (event.candidate) {
-        socket.emit("candidate", data.id, event.candidate);
+        config.socket.emit("candidate", data.id, event.candidate);
       }
     };
   });
 
 
-  socket.on("candidate", (id, candidate) => {
+  config.socket.on("candidate", (id, candidate) => {
     peerConnection
       .addIceCandidate(new RTCIceCandidate(candidate))
       .catch(e => console.error(e));
   });
 
-  socket.on("connect", () => {
-    emitWatcher(socket);
+  config.socket.on("connect", () => {
+    emitWatcher();
   });
 
-  socket.on("broadcaster", () => {
-    emitWatcher(socket);
+  config.socket.on("broadcaster", () => {
+    emitWatcher();
   });
 
   window.onunload = window.onbeforeunload = () => {
-    socket && socket.close();
+    config.socket && config.socket.close();
     peerConnection && peerConnection.close();
   };
 }
@@ -63,9 +62,9 @@ function toggleAudio() {
   toggleAudioButton.innerText = video.muted ? "开启声音" : "静音";
 }
 
-function emitWatcher(socket) {
-  socket.emit("watcher", {
-    id: socket.id,
+function emitWatcher() {
+  config.socket.emit("watcher", {
+    id: config.socket.id,
     fullname: config.fullname
   });
 }

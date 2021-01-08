@@ -1,10 +1,11 @@
 const doc = document;
 const win = window;
+let socket;
 
-function getUserInput(storagekey, msg, minlength = 6) {
+function getUserInput(storagekey, msg, minlength = 6, maxretry = 3) {
 	const defaultValue = getStorage(storagekey);
 	let userinput;
-	while (!userinput || userinput.length < minlength) {
+	while (maxretry-- > 0 && (!userinput || userinput.length < minlength)) {
 		userinput = prompt(msg, defaultValue || "");
 	}
 	setStorage(storagekey, userinput);
@@ -19,9 +20,9 @@ const setStorage = (key, val) => {
 }
 
 let notificationClearerId;
-function notifyMe(msg) {
+function notify(msg, isChat = false) {
 	// Let's check if the browser supports notifications
-	if ("Notification" in window) {
+	if (!STATE.isTabFocused && "Notification" in window) {
 		if (Notification.permission === "granted") {
 			// If it's okay let's create a notification
 			new Notification(msg);
@@ -40,19 +41,25 @@ function notifyMe(msg) {
 
 	const newItm = doc.createElement('li');
 
-	const notificationContainer = doc.querySelector('.notification');
+	const notificationContainer = doc.querySelector(
+		isChat ? '.chat-view' : '.notification'
+	);
+
 	notificationContainer.appendChild(newItm);
 	newItm.innerHTML = msg;
-	notificationContainer.classList.remove('hide');
+	notificationContainer.scrollTop = notificationContainer.scrollHeight;
 
-	clearTimeout(notificationClearerId);
-	notificationClearerId = setTimeout(
-		() => {
-			notificationContainer.innerHTML = "";
-			notificationContainer.classList.add('hide');
-		},
-		10000
-	);
+	if (!isChat) {
+		notificationContainer.classList.remove('hide');
+		clearTimeout(notificationClearerId);
+		notificationClearerId = setTimeout(
+			() => {
+				notificationContainer.innerHTML = "";
+				notificationContainer.classList.add('hide');
+			},
+			10000
+		);
+	}
 
 }
 

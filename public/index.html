@@ -4,11 +4,16 @@
 <head>
   <title>直播室</title>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
   <link href="styles.css" rel="stylesheet" />
 </head>
 
 <body>
   <section class="notification hide"></section>
+  <section class="chat">
+    <div class="chat-view"></div>
+    <form class="chat-form" onsubmit="submitChat(event)"><input name="chat-content" class="chat-input" /><button type="submit">发送</button></form>
+  </section>
   <section class="wait-broadcasting">请等待直播开始</section>
   <section class="broadcasting hide">
     <section id="handler">
@@ -21,6 +26,7 @@
   <script src="utils.js"></script>
   <script src="config.js"></script>
   <script src="watch.js"></script>
+  <script src="shared.js"></script>
 </body>
 
 </html>

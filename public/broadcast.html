@@ -9,6 +9,10 @@
 
 <body>
   <section class="notification hide"></section>
+  <section class="chat">
+    <div class="chat-view"></div>
+    <form class="chat-form" onsubmit="submitChat(event)"><input name="chat-content" class="chat-input" /><button type="submit">发送</button></form>
+  </section>
   <section class="settings">
     <section class="select">
       <label for="audioSource">音频输入: </label>
@@ -38,6 +42,7 @@
   <script src="utils.js"></script>
   <script src="config.js"></script>
   <script src="broadcast.js"></script>
+  <script src="shared.js"></script>
 </body>
 
 </html>
