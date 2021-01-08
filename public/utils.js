@@ -1,10 +1,9 @@
 const doc = document;
 const win = window;
-let socket;
-
 
 class UserList {
-	constructor() {
+	constructor(config) {
+		this._config = config;
 		this._users = {};
 	}
 	getUsers() {
@@ -24,7 +23,11 @@ class UserList {
 
 		peerConnection.onicecandidate = event => {
 			if (event.candidate) {
-				config.socket.emit("candidate", id, event.candidate);
+				// config.socket.emit("candidate", id, event.candidate);
+				config.socket.emit("candidate", {
+					id: id,
+					candidate: event.candidate
+				});
 			}
 		};
 
@@ -33,7 +36,8 @@ class UserList {
 			.then(sdp => peerConnection.setLocalDescription(sdp))
 			.then(() => {
 				config.socket.emit("offer", {
-					id,
+					streamerId: this._config.socket.id,
+					watcherId: id,
 					msg: peerConnection.localDescription,
 					broadcasterName: config.fullname
 				});
@@ -82,8 +86,11 @@ class UserList {
 }
 
 function setupSteamer(config, userlist) {
-	config.socket.on("answer", (id, description) => {
-		userlist.setUserAnswer(id, description);
+	config.socket.on("answer", (watchObj) => {
+		userlist.setUserAnswer(
+			watchObj.watcherId,
+			watchObj.localDescription,
+		);
 	});
 
 	config.socket.on("watcher", watcherObj => {
@@ -91,8 +98,8 @@ function setupSteamer(config, userlist) {
 
 	});
 
-	config.socket.on("candidate", (id, candidate) => {
-		userlist.addCandidateToUser(id, candidate);
+	config.socket.on("candidate", (candidateObj) => {
+		userlist.addCandidateToUser(candidateObj.id, candidateObj.candidate);
 	});
 
 	config.socket.on("disconnectPeer", id => {

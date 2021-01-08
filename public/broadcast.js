@@ -8,9 +8,10 @@ const videoSelect = doc.querySelector("select#videoSource");
 
 let hostkey;
 
-const userlist = new UserList();
+let userlist;
 
 if (config) {
+  userlist = new UserList(config);
   init();
 }
 

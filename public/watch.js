@@ -1,9 +1,11 @@
 const config = getConfig();
 let peerConnection;
+let streamerId;
 const video = doc.querySelector("video");
 const toggleAudioButton = doc.querySelector("#toggle-audio");
 
 if (config) {
+  peerConnection = new RTCPeerConnection(config);
   init();
 }
 
@@ -12,14 +14,18 @@ function init() {
   toggleAudioButton.addEventListener("click", toggleAudio);
 
   config.socket.on("offer", (data) => {
+    streamerId = data.streamerId;
     notify(`${data.broadcasterName} 正在直播`);
-    peerConnection = new RTCPeerConnection(config);
+
     peerConnection
       .setRemoteDescription(data.msg)
       .then(() => peerConnection.createAnswer())
       .then(sdp => peerConnection.setLocalDescription(sdp))
       .then(() => {
-        config.socket.emit("answer", data.id, peerConnection.localDescription);
+        config.socket.emit("answer", {
+          ...data,
+          localDescription: peerConnection.localDescription,
+        });
       });
     peerConnection.ontrack = event => {
 
@@ -30,15 +36,18 @@ function init() {
     };
     peerConnection.onicecandidate = event => {
       if (event.candidate) {
-        config.socket.emit("candidate", data.id, event.candidate);
+        config.socket.emit("candidate", {
+          id: streamerId,
+          candidate: event.candidate
+        });
       }
     };
   });
 
 
-  config.socket.on("candidate", (id, candidate) => {
+  config.socket.on("candidate", (candidateObj) => {
     peerConnection
-      .addIceCandidate(new RTCIceCandidate(candidate))
+      .addIceCandidate(new RTCIceCandidate(candidateObj.candidate))
       .catch(e => console.error(e));
   });
 

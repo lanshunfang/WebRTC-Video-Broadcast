@@ -66,16 +66,21 @@ turnusers.forEach(
 				socket.to(broadcaster).emit("watcher", watcherObj);
 			});
 			socket.on("offer", (data) => {
-				socket.to(data.id).emit("offer", {
+				socket.to(data.watcherId).emit("offer", {
 					...data,
-					id: socket.id,
+					//id: socket.id,
 				});
 			});
-			socket.on("answer", (id, message) => {
-				socket.to(id).emit("answer", socket.id, message);
+			socket.on("answer", (watcherObj) => {
+				socket.to(watcherObj.streamerId).emit("answer", watcherObj);
 			});
-			socket.on("candidate", (id, message) => {
-				socket.to(id).emit("candidate", socket.id, message);
+			// socket.on("candidate", (id, message) => {
+			socket.on("candidate", (candidateObj) => {
+				// socket.to(id).emit("candidate", socket.id, message);
+				socket.to(candidateObj.id).emit("candidate", {
+					...candidateObj,
+					id: socket.id,
+				});
 			});
 
 
