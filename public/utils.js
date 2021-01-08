@@ -2,6 +2,108 @@ const doc = document;
 const win = window;
 let socket;
 
+
+class UserList {
+	constructor() {
+		this._users = {};
+	}
+	getUsers() {
+		return this._users;
+	}
+	addUser(watcherObj) {
+		const id = watcherObj.id;
+		const peerConnection = new RTCPeerConnection(config);
+		this._users[id] = {
+			id: id,
+			peerConnection: peerConnection,
+			watcherObj: watcherObj,
+		};
+
+		let stream = win.stream;
+		stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+		peerConnection.onicecandidate = event => {
+			if (event.candidate) {
+				config.socket.emit("candidate", id, event.candidate);
+			}
+		};
+
+		peerConnection
+			.createOffer()
+			.then(sdp => peerConnection.setLocalDescription(sdp))
+			.then(() => {
+				config.socket.emit("offer", {
+					id,
+					msg: peerConnection.localDescription,
+					broadcasterName: config.fullname
+				});
+			});
+		notify(`用户加入：${this._users[id].watcherObj.fullname}`);
+		this.updateWatcherList();
+	}
+
+	updateWatcherList() {
+		const container = doc.querySelector('.watcher-list');
+		if (!container) {
+			return;
+		}
+		const users = Object.values(this._users)
+			.sort((a, b) => a.id === b.id ? 0 : (a.id > b.id ? -1 : 1));
+		const usersHtml = users
+			.map(
+				user => `<li id="${user.id}">${user.watcherObj.fullname}</li>`
+			)
+			.join('');
+
+		container.innerHTML = usersHtml;
+
+		const usercount = doc.querySelector('.user-count');
+		if (usercount) {
+			usercount.innerText = users.length;
+		}
+
+
+	}
+
+	setUserAnswer(id, description) {
+		this._users[id].peerConnection.setRemoteDescription(description);
+	}
+
+	disconnectUser(id) {
+		this._users[id].peerConnection.close();
+		notify(`用户离开：${this._users[id].watcherObj.fullname}`);
+		delete this._users[id];
+		this.updateWatcherList();
+	}
+
+	addCandidateToUser(id, candidate) {
+		this._users[id].peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+}
+
+function setupSteamer(config, userlist) {
+	config.socket.on("answer", (id, description) => {
+		userlist.setUserAnswer(id, description);
+	});
+
+	config.socket.on("watcher", watcherObj => {
+		userlist.addUser(watcherObj);
+
+	});
+
+	config.socket.on("candidate", (id, candidate) => {
+		userlist.addCandidateToUser(id, candidate);
+	});
+
+	config.socket.on("disconnectPeer", id => {
+		userlist.disconnectUser(id);
+	});
+
+	win.onunload = win.onbeforeunload = () => {
+		config.socket.close();
+	};
+}
+
 function getUserInput(storagekey, msg, minlength = 6, maxretry = 3) {
 	const defaultValue = getStorage(storagekey);
 	let userinput;
