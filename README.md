@@ -1,8 +1,6 @@
-# WebRTC Video/Audio Broadcast
+# WebRTC Video/Audio Broadcast with chat support
 
-WebRTC PeerToPeer broadcast application that allows the broadcaster to send video and audio stream to all connected users (watchers). 
-
-You can find the tutorial that explains the code and functionality on my [website](https://gabrieltanner.org/blog/webrtc-video-broadcast).
+A simple exercise webrtc video conferencing.
 
 ## Getting started
 
@@ -47,11 +45,9 @@ You can also use TURN servers from cloud providers or other companies.
 
 ## Author
 
-Gabriel Tanner
+- Shunfang Paul Lan
+- Original from Gabriel Tanner
 
-## Support me
-
-<a href="https://www.buymeacoffee.com/gabrieltanner" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
 
 ## License
 
